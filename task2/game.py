@@ -74,14 +74,17 @@ def print_inventory_items(items):
         print()
 
 
-def print_room(room):
+# Since gift_message is optional, omitting it won't cause errors.
+# That way the tests still succeed!
+def print_room(room, gift_message = ""):
     """This function takes a room as an input and nicely displays its name
     and description. The room argument is a dictionary with entries "name",
     "description" etc. (see map.py for the definition). The name of the room
     is printed in all capitals and framed by blank lines. Then follows the
-    description of the room and a blank line again. If there are any items
-    in the room, the list of items is printed next followed by a blank line
-    (use print_room_items() for this). For example:
+    description of the room and a blank line again. The description is put
+    through str.format(gift_message) to insert gift_message if required. If
+    there are any items in the room, the list of items is printed next
+    followed by a blank line (use print_room_items() for this). For example:
 
     >>> print_room(rooms["Office"])
     <BLANKLINE>
@@ -125,7 +128,7 @@ def print_room(room):
     print(room["name"].upper())
     print()
     # Display room description
-    print(room["description"])
+    print(room["description"].format(tutor_message=gift_message))
     print()
 
     # List room items
@@ -271,7 +274,7 @@ def execute_take(item_id):
     print("You cannot take that.")
     
 
-def execute_drop(item_id):
+def execute_drop(item_id, gift_count):
     """This function takes an item_id as an argument and moves this item from the
     player's inventory to list of items in the current room. However, if there is
     no such item in the inventory, this function prints "You cannot drop that."
@@ -280,16 +283,16 @@ def execute_drop(item_id):
         if item["id"] == item_id:
             if current_room == rooms["Tutor"]:
                 print()
-                print("""Your personal tutor swiftly tucks the gift in his
-desk. He seems to appreciate your offering.""")
+                print(f"""Your personal tutor swiftly tucks the {item_id} into
+his desk. He seems to appreciate your offering.""")
             else:
                 current_room["items"].append(item)
             inventory.remove(item)
-            return
+            return gift_count + 1
 
     print("You cannot drop that.")
 
-def execute_command(command):
+def execute_command(command, gift_count):
     """This function takes a command (a list of words as returned by
     normalise_input) and, depending on the type of action (the first word of
     the command: "go", "take", or "drop"), executes either execute_go,
@@ -314,12 +317,13 @@ def execute_command(command):
 
     elif command[0] == "drop":
         if len(command) > 1:
-            execute_drop(command[1])
+            return execute_drop(command[1], gift_count)
         else:
             print("Drop what?")
 
     else:
         print("This makes no sense.")
+    return gift_count
 
 
 def menu(exits, room_items, inv_items):
@@ -380,18 +384,26 @@ def has_won():
 
 # This is the entry point of our program
 def main():
+    # These variables control the message about the tutor's gifts.
+    gift_count = 0
+    gift_messages = ["Maybe your tutor would appreciate a gift?",
+                     "Your tutor still doesn't seem satisfied...",
+                     "Your tutor is looking friendlier than before...",
+                     "Your tutor seems to like you, but you can still make him happier.",
+                     "Your tutor seems to desire for further offerings.",
+                     "Is there anything you haven't given to your tutor?"]
 
     # Main game loop
     while True:
         # Display game status (room description, inventory etc.)
-        print_room(current_room)
+        print_room(current_room, gift_messages[gift_count])
         print_inventory_items(inventory)
 
         # Show the menu with possible actions and ask the player
         command = menu(current_room["exits"], current_room["items"], inventory)
 
         # Execute the player's command
-        execute_command(command)
+        gift_count = execute_command(command, gift_count)
 
         if has_won():
             break

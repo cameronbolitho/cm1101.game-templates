@@ -37,7 +37,8 @@ room_tutor = {
 stares at his huge monitor, ignoring you completely.
 On the desk you notice a cup of coffee and an empty
 pack of biscuits. The reception is to the west.
-Maybe your tutor would appreciate a gift?""",
+
+{tutor_message}""", # {tutor_message} will be formatted in game.py
 
     "exits": {"west": "Reception"},
 
