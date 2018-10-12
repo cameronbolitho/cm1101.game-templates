@@ -278,7 +278,12 @@ def execute_drop(item_id):
     """
     for item in inventory:
         if item["id"] == item_id:
-            current_room["items"].append(item)
+            if current_room == rooms["Tutor"]:
+                print()
+                print("""Your personal tutor swiftly tucks the gift in his
+desk. He seems to appreciate your offering.""")
+            else:
+                current_room["items"].append(item)
             inventory.remove(item)
             return
 
@@ -356,10 +361,21 @@ def move(exits, direction):
 
 
 def has_won():
-    """This function determines whether or not the player has won the game,
-    returning True if they have won and False if they have not.
+    """This function determines whether or not the player has won the game.
+    True if all items are in rooms["Tutor"].
+    Tested by checking if there are items in places other than rooms["Tutor"]
     """
-    return item_biscuits in rooms["Parking"]["items"]
+    if inventory != []:
+        return False
+    
+    non_tutor_keys = list(rooms.keys())
+    non_tutor_keys.remove("Tutor")
+
+    for room_key in non_tutor_keys:  # Check all rooms EXCEPT Tutor
+        if rooms[room_key]["items"] != []:  # If there are items in the room, the player has not won.
+            return False
+    
+    return True
 
 
 # This is the entry point of our program
@@ -368,13 +384,11 @@ def main():
     # Main game loop
     while True:
         # Display game status (room description, inventory etc.)
-        print(current_room) # #
         print_room(current_room)
         print_inventory_items(inventory)
 
         # Show the menu with possible actions and ask the player
         command = menu(current_room["exits"], current_room["items"], inventory)
-        print(command)
 
         # Execute the player's command
         execute_command(command)
@@ -383,7 +397,9 @@ def main():
             break
 
     # Player has won.
-    print("Yay you won woooooooo")
+    print()
+    print("""Your personal tutor is now appeased. Your actions
+will be appreciated.""")
 
 
 # Are we being run as a script? If so, run main().
